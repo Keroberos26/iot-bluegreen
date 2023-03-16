@@ -4,7 +4,7 @@
 
 #define FIREBASE_HOST "https://iot-bluegreen-default-rtdb.firebaseio.com/"
 #define FIREBASE_AUTH "Rs0tMRoHdDBov6GRPhQZddaaKTicjce9uqvmraNa"
-#define WIFI_SSID "FPT Thua Luu 5Ghz" // Thay đổi tên wifi của bạn
+#define WIFI_SSID "FPT Thua Luu" // Thay đổi tên wifi của bạn
 #define WIFI_PASSWORD "fptfptfpt" // Thay đổi password wifi của bạn
 
 FirebaseData fbdo;
@@ -15,6 +15,8 @@ const int sensorMoisturePin = A0;
 const int DHTPIN = 4;
 const int DHTTYPE = DHT11;
 DHT dht(DHTPIN, DHTTYPE);
+
+bool pump;
 
 void setup() {
 
@@ -46,13 +48,14 @@ void loop() {
   int sensorMoisture = analogRead(sensorMoisturePin);
   int percentMoisture = map(sensorMoisture, 0, 1023, 100, 0);
 
+  Serial.println(t);
+
   Firebase.setFloat( fbdo, "Thông số/Độ ẩm đất", percentMoisture);
   Firebase.setFloat( fbdo, "Thông số/Độ ẩm không khí", h);
   Firebase.setFloat( fbdo, "Thông số/Nhiệt độ", t);
   
   bool autoMode = false;
   bool fan = false;
-  bool pump = false;
   
   if (Firebase.getBool(fbdo, "Cài đặt/Auto")) {
     autoMode = fbdo.boolData();
@@ -74,14 +77,10 @@ void loop() {
 
     if (percentMoisture < lower) {
       pump = true;
-      Firebase.setBool( fbdo, "Trạng thái/Máy bơm", pump);
-      toggleRelay(relayPump, pump);
     }
 
     if (percentMoisture > higher) {
       pump = false;
-      Firebase.setBool( fbdo, "Trạng thái/Máy bơm", pump);
-      toggleRelay(relayPump, pump);
     }
 
     if (t > temp) {
@@ -89,24 +88,25 @@ void loop() {
     } else {
       fan = false;
     }
-
+    
+    Firebase.setBool( fbdo, "Trạng thái/Máy bơm", pump);
     Firebase.setBool( fbdo, "Trạng thái/Quạt", fan);
-    toggleRelay(relayFan, fan);
     
   } else { //Manual mode
 
     if (Firebase.getBool(fbdo, "Trạng thái/Máy bơm")) {
       pump = fbdo.boolData();
-      toggleRelay(relayPump, pump);
     }
   
     if (Firebase.getBool(fbdo, "Trạng thái/Quạt")) {
       fan = fbdo.boolData();
-      toggleRelay(relayFan, fan);
     }
   }
-  
-  delay(100);
+
+  toggleRelay(relayPump, pump);
+  toggleRelay(relayFan, fan);
+
+  delay(200);
 }
 
 // Chuyển đổi trạng thái Relay

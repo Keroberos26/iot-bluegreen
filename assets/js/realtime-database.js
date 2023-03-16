@@ -52,6 +52,9 @@ onValue(setting, (snapshot) => {
     textMode.textContent = (data['Auto']?'Tự động':'Thủ công');
     btnRelay.disabled = data['Auto'];
     btnFan.disabled = data['Auto'];
+    lowerValue.disabled = !data['Auto'];
+    higherValue.disabled = !data['Auto'];
+    tempValue.disabled = !data['Auto'];
 
     lowerValue.value = data['Ngưỡng dưới'];
     lowerNum.textContent = data['Ngưỡng dưới'];
