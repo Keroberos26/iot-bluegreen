@@ -16,7 +16,7 @@ const int DHTPIN = 4;
 const int DHTTYPE = DHT11;
 DHT dht(DHTPIN, DHTTYPE);
 
-bool pump;
+bool pump, fan;
 
 void setup() {
 
@@ -55,7 +55,6 @@ void loop() {
   Firebase.setFloat( fbdo, "Thông số/Nhiệt độ", t);
   
   bool autoMode = false;
-  bool fan = false;
   
   if (Firebase.getBool(fbdo, "Cài đặt/Auto")) {
     autoMode = fbdo.boolData();
